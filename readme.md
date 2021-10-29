@@ -5,3 +5,7 @@
 
 ![hallo-farbe](hallo-farbe.png)
 
+## P.1.1.1. Farbspektrum im Raster
+
+![farbspektrum](farbspektrum.png)
+
