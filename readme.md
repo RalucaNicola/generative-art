@@ -3,9 +3,9 @@
 
 ## P.1.0 Hallo Farbe
 
-![hallo-farbe](hallo-farbe.png)
+[![hallo-farbe](hallo-farbe.png)](hallo-farbe.html)
 
 ## P.1.1.1. Farbspektrum im Raster
 
-![farbspektrum](farbspektrum.png)
+[![farbspektrum](farbspektrum.png)](./farbspektrum.html)
 
