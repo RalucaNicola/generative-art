@@ -21,16 +21,15 @@
     const ctx = canvas.getContext("2d");
     const height = canvas.height;
     const width = canvas.width;
-    const maxStepX = width/3;
-    const maxStepY = height/3;
 
     canvas.addEventListener("mousemove", event => {
       const canvasRect = canvas.getBoundingClientRect();
-      const x = Math.round(event.clientX - canvasRect.x);
-      const y = Math.round(event.clientY - canvasRect.y);
+      const x = Math.abs(event.clientX - canvasRect.x);
+      const y = Math.abs(Math.round(event.clientY - canvasRect.y));
+
       // adding 1 to avoid the step being 0 and having endless loops
-      const stepX = 1 + x/width * maxStepX;
-      const stepY = 1 + y/height * maxStepY;
+      const stepX = 1 + x;
+      const stepY = 1 + y;
       for (let xPos = 0; xPos <=width; xPos += stepX) {
         for (let yPos = 0; yPos <= height; yPos += stepY) {
           // saturation: 0 -> 100
