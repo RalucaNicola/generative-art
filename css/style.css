@@ -1,0 +1,11 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  color: hsl(0, 0%, 20%);
+  font-family: monospace;
+}
+
+main {
+  padding: 20px;
+}

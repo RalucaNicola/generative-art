@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width" />
+  <title>Hallo Farbe</title>
+  <link href="css/style.css" rel="stylesheet" />
+</head>
+<body>
+  <main>
+    <h1>P.1.0. Hallo Farbe</h1>
+    <canvas id="draw-canvas" height="720" width="720"></canvas>
+    <p class="description">Mausposition x: grösse des Quadrats. Mausposition y: Farbton.</p>
+  </main>
+  <script>
+    const canvas = document.getElementById("draw-canvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.addEventListener("mousemove", event => {
+      const canvasRect = canvas.getBoundingClientRect();
+      const x = Math.round(event.clientX - canvasRect.x);
+      const y = Math.round(event.clientY - canvasRect.y);
+      console.log(x, y);
+      ctx.fillStyle = `hsl(${y/2}, 100%, 50%)`;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = `hsl(${360 - y/2}, 100%, 50%)`;
+      ctx.fillRect(360 - x/2, 360 - x/2, x, x);
+    });
+  </script>
+</body>
+</html>
