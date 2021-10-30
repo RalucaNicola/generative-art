@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width" />
+  <title>Farbspektrum im Kreis</title>
+  <link href="css/style.css" rel="stylesheet" />
+</head>
+<body>
+  <main>
+    <h1>Farbspektrum im Kreis</h1>
+    <canvas id="draw-canvas" height="600" width="600"></canvas>
+    <p class="description">Taste 1 -> 360 Segmente, Taste 2 -> 45 Segmente, Taste 4 -> 12 Segemente</p>
+  </main>
+  <script>
+    const canvas = document.getElementById("draw-canvas");
+    const ctx = canvas.getContext("2d");
+    const width = canvas.width;
+    const height = canvas.height;
+    const R = 250;
+    const center = [width/2, height/2];
+
+    function toRadians(angle) {
+      return angle * Math.PI / 180;
+    }
+
+    document.addEventListener("keydown", function(event) {
+      switch (event.key) {
+        case '1':
+          segmentCount = 360;
+          break;
+        case '2':
+          segmentCount = 45;
+          break;
+        case '3':
+          segmentCount = 24;
+          break;
+        case '4':
+          segmentCount = 12;
+          break;
+        case '5':
+          segmentCount = 6;
+          break;
+      }
+
+      draw(segmentCount);
+    });
+
+    function draw(segmentCount) {
+      ctx.clearRect(0, 0, width, height);
+      console.log(segmentCount);
+      const angleStep = 360 / segmentCount;
+      for (let angle = 0; angle < 360; angle += angleStep) {
+        const rad = toRadians(angle);
+        ctx.beginPath();
+        ctx.moveTo(center[0], center[1]);
+        ctx.lineTo(width/2 + R * Math.cos(rad), height/2 + R * Math.sin(rad));
+        ctx.arc(center[0], center[1], R, toRadians(angle), toRadians(angle + angleStep), false);
+        ctx.fillStyle = `hsl(${angle}, 100%, 50%)`;
+        ctx.fill();
+      }
+    }
+
+    draw(360);
+
+
+  </script>
+</body>
+</html>
