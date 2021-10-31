@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <meta name="viewport"
+    content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width" />
+  <title>Farbpaletten aus Bildern</title>
+  <link href="css/style.css" rel="stylesheet" />
+</head>
+
+<body>
+  <main>
+    <h1>Farbpaletten aus Bildern</h1>
+    <canvas id="draw-canvas" height="500" width="500"></canvas>
+    <p>Maus: Position X: Auflösung
+    </p>
+    <p>
+      Tasten: 1-3: Beispielbild wechseln. Sortierung nach: 4- Farbe, 5-Sätigung, 6-Helligkeit, 7-Originalbild
+    </p>
+  </main>
+  <script>
+    const canvas = document.getElementById("draw-canvas");
+    const ctx = canvas.getContext("2d");
+
+    const height = canvas.height;
+    const width = canvas.width;
+    let tileCount = 100;
+    let currentImageIndex = 0;
+    let sort = "none";
+
+    const imageSources = ["./images/zurich.png", "./images/bucharest.png", "./images/paris.png"];
+    const images = imageSources.map(source => {
+      const img = new Image();
+      img.src = source;
+      return img;
+    });
+
+    Promise.all(images.map(img => {
+      return new Promise((resolve, reject) => {
+        img.onload = event => {resolve();};
+        img.onerror = event => {reject();};
+      });
+    })).then(draw);
+
+    function draw() {
+      ctx.drawImage(images[currentImageIndex], 0, 0);
+      const data = ctx.getImageData(0, 0, width, height).data;
+      const rectSize = Math.round(width / tileCount);
+      ctx.clearRect(0, 0, width, height);
+      const colors = [];
+      for (let x = 0; x < tileCount; x++) {
+        for (let y = 0; y < tileCount; y++) {
+          const i = (y * rectSize * width + x * rectSize) * 4;
+          const hsl = rgb2hsl([data[i], data[i+1], data[i+2]]);
+          colors.push(hsl);
+        }
+      }
+
+      if (sort !== "none") {
+        colors.sort((color1, color2) => {
+          switch (sort) {
+            case "hue":
+              return color1[0] - color2[0];
+              break;
+            case "saturation":
+              return color1[1] - color2[1];
+              break;
+            case "lightness":
+              return color1[2] - color2[2];
+          }
+        })
+      }
+
+      let i = 0;
+      for (let x = 0; x < tileCount; x++) {
+        for (let y = 0; y < tileCount; y++) {
+          ctx.fillStyle = `hsl(${colors[i][0]}, ${colors[i][1]}%, ${colors[i][2]}%)`;
+          ctx.fillRect(x * rectSize, y * rectSize, rectSize, rectSize);
+          i++;
+        }
+      }
+    }
+
+    document.addEventListener("keydown", event => {
+      // 1 is HSL and 2 is RGB
+      if (event.key === "1") {
+        currentImageIndex = 0;
+      }
+      if (event.key === "2") {
+        currentImageIndex = 1;
+      }
+      if (event.key === "3") {
+        currentImageIndex = 2;
+      }
+      if (event.key === "4") {
+        sort = "hue";
+      }
+      if (event.key === "5") sort = "saturation";
+      if (event.key === "6") sort = "lightness";
+      if (event.key === "7") sort = "none";
+
+      if (event.key === "s") {
+        const date = new Date();
+        const link = document.createElement("a");
+        link.setAttribute("download", `${date}.png`);
+        link.setAttribute("href", canvas.toDataURL("image/png").replace("image/png", "image/octet-stream"));
+        link.click();
+      }
+      draw();
+    });
+
+    /*
+    * Change number of samples based on mouse position
+    */
+
+    canvas.addEventListener("mousemove", event => {
+      const canvasRect = canvas.getBoundingClientRect();
+      const x = event.clientX - canvasRect.x;
+      const y = event.clientY - canvasRect.y;
+
+      tileCount = Math.round(width/Math.max(x, 5));
+      draw();
+    });
+
+    function rgb2hsl(color) {
+      // normalize values
+      const r = color[0] / 255;
+      const g = color[1] / 255;
+      const b = color[2] / 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+
+      if (max == min) {
+        h = s = 0; // achromatic
+      } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r:
+            h = (g - b) / d + (g < b ? 6 : 0);
+            break;
+          case g:
+            h = (b - r) / d + 2;
+            break;
+          case b:
+            h = (r - g) / d + 4;
+            break;
+        }
+        h /= 6;
+      }
+      return [h * 360, s * 100, l * 100];
+    }
+
+  </script>
+</body>
+
+</html>

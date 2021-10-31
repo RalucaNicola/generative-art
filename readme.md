@@ -13,6 +13,10 @@
 
 [![farbspektrum-kreis](farbspektrum-kreis.png)](./farbspektrum-kreis.html)
 
-## P.1.1.2. Farbpaletten durch Interpolation
+## P.1.2.1. Farbpaletten durch Interpolation
 
 [![farbpaletten-interpolation](farbpaletten-interpolation.png)](./farbpaletten-interpolation.html)
+
+## P.1.2.2. Farbpaletten aus Bildern
+
+[![farbpaletten-bildern](farbpaletten-bildern.png)](./farbpaletten-bildern.html)
