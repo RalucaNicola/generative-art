@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <meta name="viewport"
+    content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width" />
+  <title>Farbpaletten durch Interpolation</title>
+  <link href="css/style.css" rel="stylesheet" />
+</head>
+
+<body>
+  <main>
+    <h1>Farbpaletten durch Interpolation</h1>
+    <canvas id="draw-canvas" height="500" width="500"></canvas>
+    <p class="description">Dieselbe Farbe wird je nach gewähltem Farbraum (RGB oder HSL) durch unterschiedliche Werte
+      definiert und
+      dadurch fürht jeweils auch der Weg über andere Farben.
+    </p>
+    <p>
+      Maus: Linksclick: neues zufälliges Farbset, Position X: Auflösung, Position Y: Anzahl der Reihen.
+    </p>
+    <p>
+      Tasten: 1-2: Interpolationsstile, s: Bild speichern
+    </p>
+  </main>
+  <script>
+    const canvas = document.getElementById("draw-canvas");
+    const ctx = canvas.getContext("2d");
+
+    const height = canvas.height;
+    const width = canvas.width;
+    let HSLmode = true;
+    let tilesX = 20;
+    let tilesY = 10;
+    let noColors = 10;
+    let colorsLeft = [], colorsRight = [];
+
+    function setRandomColors() {
+      colorsLeft = [];
+      colorsRight = [];
+      for (let i = 0; i < noColors; i++) {
+        colorsLeft.push([Math.random() * 360, 50 + Math.random() * 50, 50]);
+        colorsRight.push([Math.random() * 360, 50 + Math.random() * 50, 50]);
+      }
+      if (!HSLmode) {
+        colorsLeft = colorsLeft.map(color => hsl2rgb(color));
+        colorsRight = colorsRight.map(color => hsl2rgb(color));
+      }
+    }
+
+    function draw() {
+      for (let y = 0; y < tilesY; y++) {
+        const color1 = colorsLeft[y];
+        const color2 = colorsRight[y];
+        const colors = lerpColors(color1, color2, tilesX - 1);
+        for (let x = 0; x < tilesX; x++) {
+          if (HSLmode) {
+            ctx.fillStyle = `hsl(${colors[x][0]}, ${colors[x][1]}%, ${colors[x][2]}%)`;
+          } else {
+            ctx.fillStyle = `rgb(${colors[x][0]}, ${colors[x][1]}, ${colors[x][2]})`;
+          }
+          ctx.fillRect(x * width / tilesX, y * height / tilesY, x + width / tilesX, y + height / tilesY);
+        }
+      }
+    }
+    setRandomColors();
+    draw();
+
+    /*
+    * Convert from rgb to hsl: https://axonflux.com/handy-rgb-to-hsl-and-rgb-to-hsv-color-model-c
+    */
+    function rgb2hsl(color) {
+      // normalize values
+      const r = color[0] / 255;
+      const g = color[1] / 255;
+      const b = color[2] / 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+
+      if (max == min) {
+        h = s = 0; // achromatic
+      } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r:
+            h = (g - b) / d + (g < b ? 6 : 0);
+            break;
+          case g:
+            h = (b - r) / d + 2;
+            break;
+          case b:
+            h = (r - g) / d + 4;
+            break;
+        }
+        h /= 6;
+      }
+      return [h * 360, s * 100, l * 100];
+    }
+
+    /*
+    * Convert from hsl to rgb: from wikipedia: https://en.wikipedia.org/wiki/HSL_and_HSV#HSL_to_RGB
+    */
+    function hue2rgb(h1, chroma, x) {
+      if (h1 < 1) return [chroma, x, 0];
+      if (h1 < 2) return [x, chroma, 0];
+      if (h1 < 3) return [0, chroma, x];
+      if (h1 < 4) return [0, x, chroma];
+      if (h1 < 5) return [x, 0, chroma];
+      if (h1 < 6) return [chroma, 0, x];
+      return [0, 0, 0];
+    }
+
+    function hsl2rgb(color) {
+      // normalize color
+      const h = color[0];
+      const s = color[1] / 100;
+      const l = color[2] / 100;
+
+      if (s === 0) { // achromatic
+        return [0, 0, 0];
+      }
+
+      const chroma = (1 - Math.abs(2 * l - 1)) * s;
+      const h1 = h / 60;
+      const x = chroma * (1 - Math.abs((h / 60) % 2 - 1));
+      const [r1, g1, b1] = hue2rgb(h1, chroma, x);
+      const m = l - chroma / 2;
+
+      return [(r1 + m) * 255, (g1 + m) * 255, (b1 + m) * 255];
+    }
+
+    /*
+    * Interpolate between 2 colors
+    */
+
+    function lerp(val1, val2, ratio) {
+      return val1 + ratio * (val2 - val1);
+    }
+
+    function lerpColors(color1, color2, steps) {
+      const colorsArray = [];
+      for (let i = 0; i <= steps; i++) {
+        colorsArray.push([
+          lerp(color1[0], color2[0], i / steps),
+          lerp(color1[1], color2[1], i / steps),
+          lerp(color1[2], color2[2], i / steps)
+        ]);
+      }
+
+      return colorsArray;
+    }
+
+    /*
+    * Convert between RGB and HSL
+    */
+
+    document.addEventListener("keydown", event => {
+      // 1 is HSL and 2 is RGB
+      if (event.key === "1") {
+        if (!HSLmode) {
+          colorsLeft = colorsLeft.map(color => rgb2hsl(color));
+          colorsRight = colorsRight.map(color => rgb2hsl(color));
+          HSLmode = true;
+          draw();
+        }
+      }
+      if (event.key === "2") {
+        if (HSLmode) {
+          colorsLeft = colorsLeft.map(color => hsl2rgb(color));
+          colorsRight = colorsRight.map(color => hsl2rgb(color));
+          HSLmode = false;
+          draw();
+        }
+      }
+      if (event.key === "s") {
+        const date = new Date();
+        const link = document.createElement("a");
+        link.setAttribute("download", `${date}.png`);
+        link.setAttribute("href", canvas.toDataURL("image/png").replace("image/png", "image/octet-stream"));
+        link.click();
+      }
+    });
+
+    /*
+    * Change number of samples based on mouse position
+    */
+
+    canvas.addEventListener("mousemove", event => {
+      const canvasRect = canvas.getBoundingClientRect();
+      const x = event.clientX - canvasRect.x;
+      const y = event.clientY - canvasRect.y;
+
+      // minimum of 5 and 2 tiles on x, resp y axis
+      // x, y can have negative values (no clue why)
+      tilesX = Math.round(5 + Math.max(x, 1) / width * 95);
+      tilesY = Math.round(2 + Math.max(y, 1) / height * 8);
+      draw();
+    });
+
+    document.addEventListener("click", event => {
+      setRandomColors();
+      draw();
+    });
+
+
+
+
+  </script>
+</body>
+
+</html>
