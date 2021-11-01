@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <meta name="viewport"
+    content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width" />
+  <title>Farbpaletten aus Regeln</title>
+  <link href="css/style.css" rel="stylesheet" />
+</head>
+
+<body>
+  <main>
+    <h1>P.1.2.3.01 - Farbpaletten aus Regeln</h1>
+    <canvas id="draw-canvas" height="500" width="500"></canvas>
+    <p>
+      Maus: Position X: Auflösung, Position Y: Anzahl der Reihen.
+    </p>
+    <p>
+      Tasten:
+      1: Pastels, 2: Kalt, 3: Lila, 4: Warm, s: Bild speichern
+    </p>
+  </main>
+  <script>
+    const canvas = document.getElementById("draw-canvas");
+    const ctx = canvas.getContext("2d");
+
+    const height = canvas.height;
+    const width = canvas.width;
+    let tilesX = 40;
+    let tilesY = 10;
+    const noColors = 100;
+    let colors = [];
+
+    function generatePastels(){
+      colors = [];
+      for (let i = 0; i < noColors; i++) {
+        let hue = Math.random() * 60;
+        if (Math.random() < 0.5) {hue = 180 + Math.random() * 60;}
+        colors.push([hue, 50, 70 + Math.random() * 20]);
+      }
+    }
+
+    function generateColdTones() {
+      colors = [];
+      for (let i = 0; i < noColors; i++) {
+        colors.push([200 + Math.random() * 50, 10 + Math.random() * 70, 50 + Math.random() * 20]);
+      }
+    }
+
+    function generatePurpleShades() {
+      colors = [];
+      for (let i = 0; i < noColors; i++) {
+        colors.push([280, 30 + Math.random() * 70, 40 + Math.random() * 50]);
+      }
+    }
+
+    function generateHotColors() {
+      colors = [];
+      for (let i = 0; i < noColors; i++) {
+        colors.push([Math.random() * 60, 70 + Math.random() * 30, 50 + Math.random() * 40]);
+      }
+    }
+
+    function draw() {
+      let i = 0;
+      for (let y = 0; y < tilesY; y++) {
+        for (let x = 0; x < tilesX; x++) {
+          i++;
+          ctx.fillStyle = `hsl(${colors[i%noColors][0]}, ${colors[i%noColors][1]}%, ${colors[i%noColors][2]}%)`;
+          ctx.fillRect(x * width / tilesX, y * height / tilesY, width / tilesX, height / tilesY);
+        }
+      }
+    }
+    generatePastels();
+    draw();
+
+    document.addEventListener("keydown", event => {
+      // 1 means pastels
+      if (event.key === "1") {
+        generatePastels();
+        draw();
+      }
+      // 2 means cold tones
+      if (event.key === "2") {
+        generateColdTones();
+        draw();
+      }
+      // 3 means various shdes of purple
+      if (event.key === "3") {
+        generatePurpleShades();
+        draw();
+      }
+      // 4 means hot
+      if (event.key === "4") {
+        generateHotColors();
+        draw();
+      }
+      if (event.key === "s") {
+        const date = new Date();
+        const link = document.createElement("a");
+        link.setAttribute("download", `${date}.png`);
+        link.setAttribute("href", canvas.toDataURL("image/png").replace("image/png", "image/octet-stream"));
+        link.click();
+      }
+    });
+
+    /*
+    * Change number of samples based on mouse position
+    */
+
+    canvas.addEventListener("mousemove", event => {
+      const canvasRect = canvas.getBoundingClientRect();
+      const x = event.clientX - canvasRect.x;
+      const y = event.clientY - canvasRect.y;
+
+      // minimum of 5 and 2 tiles on x, resp y axis
+      // x, y can have negative values (no clue why)
+      tilesX = Math.round(3 + Math.max(x, 1) / width * 47);
+      tilesY = Math.round(2 + Math.max(y, 1) / height * 8);
+      draw();
+    });
+
+  </script>
+</body>
+
+</html>

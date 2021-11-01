@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <meta name="viewport"
+    content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width" />
+  <title>Farbpaletten aus Regeln</title>
+  <link href="css/style.css" rel="stylesheet" />
+</head>
+
+<body>
+  <main>
+    <h1>P.1.2.3.02 - Farbpaletten aus Regeln</h1>
+    <canvas id="draw-canvas" height="500" width="500"></canvas>
+    <p>
+      Maus: Click links: neue Komposition.
+    </p>
+    <p>
+      Tasten: s: Bild speichern
+    </p>
+  </main>
+  <script>
+    const canvas = document.getElementById("draw-canvas");
+    const ctx = canvas.getContext("2d");
+    ctx.globalCompositeOperation = "multiply";
+
+    const height = canvas.height;
+    const width = canvas.width;
+    let tilesY = 10;
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+      for (let y = tilesY - 1; y >= 0; y--) {
+        let currentTotalWidth = 0;
+        while (width - currentTotalWidth > 5) {
+          const currentWidth = width * Math.random() * 0.1;
+          let hue = 270;
+          let sat = 80;
+          let lightness = 40 + Math.random() * 20;
+          if (Math.random() < 0.5) {
+            hue = 45;
+          }
+          const localHeight = height / tilesY + Math.random() * 25;
+          const gradient = ctx.createLinearGradient(currentTotalWidth, y * height / tilesY, currentTotalWidth, y * height / tilesY + localHeight);
+          gradient.addColorStop(0, `hsla(${hue}, ${sat}%, ${lightness}%, ${1})`);
+          gradient.addColorStop(1, `hsla(${hue}, ${sat}%, ${lightness}%, ${0.6})`);
+          ctx.fillStyle = gradient;
+          ctx.fillRect(currentTotalWidth, y * height / tilesY, currentWidth, localHeight);
+          currentTotalWidth += currentWidth;
+        }
+      }
+    }
+
+    draw();
+
+    document.addEventListener("click", event => {
+      draw();
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "s") {
+        const date = new Date();
+        const link = document.createElement("a");
+        link.setAttribute("download", `${date}.png`);
+        link.setAttribute("href", canvas.toDataURL("image/png").replace("image/png", "image/octet-stream"));
+        link.click();
+      }
+    });
+
+  </script>
+</body>
+
+</html>
