@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width" />
+  <title>Hallo Form</title>
+  <link href="css/style.css" rel="stylesheet" />
+</head>
+<body>
+  <main>
+    <h1>P.2.0. Hallo Form</h1>
+    <canvas id="draw-canvas" height="720" width="720"></canvas>
+    <p> Mausposition x: Grösse der Radius. Mausposition y: Anzahl und Strichstärke der Linien.</p>
+  </main>
+  <script>
+    const canvas = document.getElementById("draw-canvas");
+    const ctx = canvas.getContext("2d");
+
+    const width = canvas.width;
+    const height = canvas.height;
+    const center = [width/2, height/2];
+
+    // parameters that will change
+    let R = 200;
+    let n = 7;
+    let lineWidth = 1;
+
+    function draw(){
+      ctx.clearRect(0, 0, width, height);
+      for (let i = 1; i <= n; i++) {
+        ctx.beginPath();
+        ctx.moveTo(center[0], center[1]);
+        ctx.lineTo(width/2 + R * Math.cos(i * 2*Math.PI/n), height/2 + R * Math.sin(i * 2*Math.PI/n));
+        ctx.lineWidth = lineWidth;
+        ctx.stroke();
+      }
+    };
+
+    canvas.addEventListener("mousemove", event => {
+      const canvasRect = canvas.getBoundingClientRect();
+      const x = Math.round(event.clientX - canvasRect.x);
+      const y = Math.round(event.clientY - canvasRect.y);
+      R = Math.abs(width/2 - x);
+      n = Math.round(y / 10);
+      lineWidth = Math.max(1, y / 50);
+      draw();
+    });
+  </script>
+</body>
+</html>
