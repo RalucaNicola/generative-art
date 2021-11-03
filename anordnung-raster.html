@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width" />
+  <title>Anordnung im Raster</title>
+  <link href="css/style.css" rel="stylesheet" />
+</head>
+<body>
+  <main>
+    <h1>P.2.1. Anordnung im Raster</h1>
+    <canvas id="draw-canvas" height="600" width="600"></canvas>
+    <p> Mausposition x, y: Strichstärke der Diagonalen. Linksclick: neue Zufallswerte. Tasten: 1, 2, 3: Art der Linienenden.</p>
+  </main>
+  <script>
+    const canvas = document.getElementById("draw-canvas");
+    const ctx = canvas.getContext("2d");
+
+    const width = canvas.width;
+    const height = canvas.height;
+    let directions = [];
+
+    // parameters that will change
+    let res = 30;
+    let size = 20;
+    let lineWidthA = 1;
+    let lineWidthB = 5;
+    let lineCap = "round";
+
+    function generateRandomDirections() {
+      directions = [];
+      for (let i = 0; i < res; i++) {
+        for (let j = 0; j < res; j++) {
+          // A: links oben nach rechts unten
+          // B: links unten nach rechts oben
+          directions.push(Math.random() < 0.5 ? "A" : "B");
+        }
+      }
+    }
+
+    function draw(){
+      ctx.clearRect(0, 0, width, height);
+      for (let i = 0; i < res; i++) {
+        for (let j = 0; j <res; j++) {
+          ctx.beginPath();
+          //console.log(i * (res -1) + j, directions[i * (res -1) + j]);
+          if (directions[i * (res -1) + j] === "A") {
+            ctx.moveTo(i * size, j * size);
+            ctx.lineTo(i * size + size, j * size + size);
+            ctx.lineWidth = lineWidthA;
+          } else {
+            ctx.moveTo(i * size, j * size + size);
+            ctx.lineTo(i * size + size, j * size);
+            ctx.lineWidth = lineWidthB;
+          }
+          ctx.lineCap = lineCap;
+          ctx.stroke();
+        }
+      }
+    };
+    generateRandomDirections();
+    draw();
+
+    canvas.addEventListener("mousemove", event => {
+      const canvasRect = canvas.getBoundingClientRect();
+      const x = Math.round(event.clientX - canvasRect.x);
+      const y = Math.round(event.clientY - canvasRect.y);
+      lineWidthA = Math.max(1, x / 60);
+      lineWidthB = Math.max(1, y / 60);
+      draw();
+    });
+    document.addEventListener("click", event => {
+      generateRandomDirections();
+      draw();
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "1") {
+       lineCap = "round";
+      }
+      if (event.key === "2") {
+        lineCap = "butt";
+      }
+      if (event.key === "3") {
+        lineCap = "square";
+      }
+      draw();
+    });
+  </script>
+</body>
+</html>
