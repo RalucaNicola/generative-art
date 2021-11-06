@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width" />
+  <title>Verschiebung im Raster</title>
+  <link href="css/style.css" rel="stylesheet" />
+</head>
+<body>
+  <main>
+    <h1>P.2.1.2.02 Verschiebung im Raster 2</h1>
+    <canvas id="draw-canvas" height="600" width="600"></canvas>
+    <p> </p>
+  </main>
+  <script>
+    const canvas = document.getElementById("draw-canvas");
+    const ctx = canvas.getContext("2d");
+
+    const width = canvas.width;
+    const height = canvas.height;
+    const res = 20;
+    const size = 40;
+
+    function draw(x, y){
+      ctx.clearRect(0, 0, width, height);
+      for (let j = 0; j < res; j++) {
+        for (let i = 0; i < res; i++) {
+          ctx.beginPath();
+          const xPos = i * size + 10 * (i * size - x) / (size * res);
+          const yPos = j * size + 10 * (j * size - y) / (size * res);
+          ctx.arc(xPos, yPos, size / 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(223,30%, 40%, 1)`;
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(i * size, j * size, size / 5, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(0, 100%, 100%, 1)`;
+          ctx.fill();
+        }
+      }
+    };
+
+    canvas.addEventListener("mousemove", event => {
+      const canvasRect = canvas.getBoundingClientRect();
+      const x = Math.round(event.clientX - canvasRect.x);
+      const y = Math.round(event.clientY - canvasRect.y);
+      draw(x, y);
+    });
+
+  </script>
+</body>
+</html>

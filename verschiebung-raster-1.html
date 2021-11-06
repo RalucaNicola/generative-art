@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width" />
+  <title>Verschiebung im Raster</title>
+  <link href="css/style.css" rel="stylesheet" />
+</head>
+<body>
+  <main>
+    <h1>P.2.1.2.01 Verschiebung im Raster 1</h1>
+    <canvas id="draw-canvas" height="600" width="600"></canvas>
+    <p> </p>
+  </main>
+  <script>
+    const canvas = document.getElementById("draw-canvas");
+    const ctx = canvas.getContext("2d");
+
+    const width = canvas.width;
+    const height = canvas.height;
+    const res = 20;
+    const size = 30;
+
+    // parameters that will change
+    let R = size/3;
+    let lineWidth = 1;
+    let directions = [];
+
+    function generateRandomDirections() {
+      directions = [];
+      for (let i = 0; i < res; i++) {
+        directions[i] = [];
+        for (let j = 0; j < res; j++) {
+          const dirX = 2 * Math.random() - 1;
+          const dirY = 2 * Math.random() - 1;
+          directions[i].push([dirX, dirY]);
+        }
+      }
+    }
+
+    function draw(x){
+      ctx.clearRect(0, 0, width, height);
+      for (let i = 0; i < res; i++) {
+        for (let j = 0; j < res; j++) {
+          ctx.beginPath();
+          const delta = x / res;
+          ctx.arc(i * size + directions[i][j][0] * delta, j * size + directions[i][j][1] * delta, R, 0, 360);
+          ctx.strokeStyle = `hsla(0, 0%, 0%, 0.4)`;
+          ctx.lineWidth = lineWidth;
+          ctx.stroke();
+        }
+      }
+    };
+    generateRandomDirections();
+    draw();
+
+    canvas.addEventListener("mousemove", event => {
+      const canvasRect = canvas.getBoundingClientRect();
+      const x = Math.round(event.clientX - canvasRect.x);
+      const y = Math.round(event.clientY - canvasRect.y);
+      lineWidth = Math.max(1, y / 60);
+      R = Math.max(1, y / 30);
+      draw(x);
+    });
+
+    document.addEventListener("click", event => {
+      const canvasRect = canvas.getBoundingClientRect();
+      const x = Math.round(event.clientX - canvasRect.x);
+      generateRandomDirections();
+      draw(x);
+    });
+  </script>
+</body>
+</html>
